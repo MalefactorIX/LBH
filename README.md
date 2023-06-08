@@ -1,4 +1,4 @@
-# LBH
+# Listen-Based Health
 Non-Fork of LBH, ported from https://github.com/MalefactorIX/SLMCLBA/tree/master/LBH
 
 [IMPORTANT] 
