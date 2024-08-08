@@ -1,9 +1,17 @@
 //A slim and simplified version of the LBA parser.
-integer mhp=100;//Maximum HP
+string otype="OBJ";//Declares the type of object
+/*Use the following
+OBJ = Normal object (ie. Barricade)
+VEH = Ground Vehicle
+AIR = Aerial Vehicle
+SKR = Seeking Munition (Likely not relevant here but included for documentation purposes)
+MINE = Mine, Claymore, etc
+*/
+integer mhp=50;//Maximum HP
 integer hp=mhp;//Current HP
 //Positive Numbers Deal Damage
 //Negative Numbers Restore Health
-integer atcap=50;
+integer atcap=25;//Most weapons should not be dealing more than 25 damage in a single hit.
 //Damage Processor
 damage(integer amt, key id)
 {
@@ -34,7 +42,7 @@ damage(integer amt, key id)
 update()//SetText
 {
     llSetLinkPrimitiveParamsFast(-4,[PRIM_TEXT,"[LBHS]\n "+(string)hp+" / "+(string)mhp+" HP",<1.0,1.0,1.0>,1.0,
-        PRIM_DESC,"LBA.v.HS,"+(string)hp+","+(string)mhp+","+(string)atcap+",666"]);
+        PRIM_DESC,"LBA.v.HS,"+(string)hp+","+(string)mhp+","+(string)atcap+",666,"+otype]);
         //In order: Current HP, Max HP, Max AT accepted, Max healing accepted (Not implemented)
 }
 die()
@@ -71,11 +79,11 @@ default
     }
     on_rez(integer p)
     {
-        if(p>1)//Allows HUD/Objects to set HP value when rezzed with a param, otherwise uses default
+        /*if(p>1)//Allows HUD/Objects to set HP value when rezzed with a param, otherwise uses default
         {
             mhp=p;
             hp=p;
-        }
+        }*/
         boot();
     }
     listen(integer chan, string name, key id, string message)
@@ -89,7 +97,7 @@ default
             //if(amt>0)damage((integer)amt,id);//Use this code if you do not wish to support healing
         }
     }
-    collision_start(integer c)//Enable this block if you want to support legacy collisions.
+    /*collision_start(integer c)//Enable this block if you want to support legacy collisions.
     {
         if(llVecMag(llDetectedVel(0))>40.0)
         {
@@ -97,7 +105,7 @@ default
             if(hp<1)die();//llDie();
             else update();
         }
-    }
+    }*/
     timer()//Auto-deleter. Will kill object if avatar leaves the region or spawning object is removed.
     {
         if(tar(gen))return;
