@@ -36,8 +36,11 @@ default
             else
             {
                 integer newamt=llFloor(llList2Integer(damage,0)*reduct);
-                llAdjustDamage(d,newamt);
-                hp-=newamt;
+                if(newamt>0)
+                {
+                    llAdjustDamage(d,newamt);
+                    hp-=newamt;
+                }
             }
         }
         if(hp<0)hp=0;//Prevents HP from reporting negative values
