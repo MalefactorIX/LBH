@@ -3,8 +3,6 @@ float speed=10.0;
 integer max=50;
 integer fuel=max;
 key o;
-string sound_start = "2e1b2455-0c7f-650f-20a1-10b73e709609";
-integer start;
 string last="S";
 vector color=<0.5,0.5,1.0>;
 text(string mess)
