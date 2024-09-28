@@ -26,6 +26,7 @@ default
         }
         else if(m=="Normal")
         {
+            mode=1;
             llOwnerSay("Damage Detector set to report On Hit");
         }
     }
@@ -74,6 +75,7 @@ state off
         }
         else if(m=="Normal")
         {
+            mode=1;
             llOwnerSay("Damage Detector set to report On Hit");
             state default;
         }
