@@ -1,5 +1,6 @@
 //MBTLBA was a stupid name
-string ver="DHCv1.4.4";//LBA Version
+string ver="DHCv1.5.0";//LBA Version
+vector color=<1.0,0.5,0.0>;
 //efx
 integer burning;//burning flag
 integer repair;//repair timer
@@ -8,22 +9,22 @@ integer layer;//detrack layers
 integer ml;//Mouselook tracker
 integer emk;//em kit
 //
-integer mhp=250;//Maximum HP
+integer mhp=200;//Maximum HP
 integer hp=mhp;//Current HP
 //Positive Numbers Deal Damage
 //Negative Numbers Restore Health
 //Damage Multipliers: 0 = Invulnerable, 1.0 = 100% Damage, High numbers = Higher Damage
-integer atcap=500;
+integer atcap=50;
 float front=0.5;
 float side=1.0;
 float back=1.5;
 float middle=0.1;
 //Note that following modifiers multiply the final damage. So it stacks multiplicatively with the previous modifiers
-float top=1.2;
-float bottom=1.2;
+float top=1.0;
+float bottom=1.0;
 //Directional Processor
-float front_threshold=20.0;//Use positive floats, determines forward range
-float back_threshold=160.0;//Use positive floats, determines backward range
+float front_threshold=45.0;//Use positive floats, determines forward range
+float back_threshold=135.0;//Use positive floats, determines backward range
 float top_threshold=0.75;//How far up the Z axis should the source be to registered a top. (Positive Number)
 float bottom_threshold=-0.75;//How far down the Z axis should the source be to registered a bottom hit. (Negative Number)
 vector collisionmod(vector pos, vector targetPos)
@@ -35,8 +36,7 @@ vector collisionmod(vector pos, vector targetPos)
         if(dist<1.0)return <0.01,0.0,0.0>;//This catches explosions which rezzes AT in the object's root position.
         else
         {
-            vector fpos=(targetPos-pos)/llGetRot();
-            float mod=fpos.z;
+            float mod=targetPos.z-pos.z;
             if(mod>=top_threshold)mod=top;//Top check
             else if(mod<=bottom_threshold)
             {
@@ -71,18 +71,17 @@ damage(integer amt, key id,vector pos, vector targetPos,vector tmod,string name)
                 llMessageLinked(-4,1,"","");
                 llOwnerSay("Status Repaired");
             }
-            amt*=-1.0;
             if(amt>(float)hp*0.1)amt=llRound(hp*0.1);//Optional healing cap
-            hp+=amt;
+            hp-=amt;
             if(hp>mhp)hp=mhp;//Used to prevent overhealing
             llResetTime();
         }
         //Be sure to update the listen event code block to allow negative damage values through.
     }
-    else if(amt<6)
+    else if(amt<6&&~llGetAgentInfo(llGetOwnerKey(id))&AGENT_SITTING)
     {
         llRegionSayTo(llGetOwnerKey(id),0,"*plink*");
-        return; //Blocks micro-LBA, stop that shit
+        return; //Blocks micro-LBA from infantry
     }
     else
     {
@@ -130,7 +129,7 @@ damage(integer amt, key id,vector pos, vector targetPos,vector tmod,string name)
         }
         else //Failed to do damage
         {
-            llOwnerSay("Damage Blocked by Armor");
+            //llOwnerSay("Damage Blocked by Armor");
             llRegionSayTo(llGetOwnerKey(id),0,"Attack was stopped by armor.");
             return;
         }
@@ -146,20 +145,28 @@ update()//SetText
     string mod="\n";
     if(burning||detrack)
     {
-        if(burning)mod+="[Burning] ";
+        if(burning)mod+="[Engine on Fire] ";
         if(detrack)mod+="[Detracked]";
         if(!ml)mod+="\n Repair-in-Progress \n"+(string)((integer)repair*10)+"/100";
     }
-    llSetLinkPrimitiveParamsFast(-4,[PRIM_TEXT,"[LBHD]\n "+(string)hp+" / "+(string)mhp+" HP"+mod,<0.0,0.75,1.0>,1.0,
+    llSetLinkPrimitiveParamsFast(-4,[PRIM_TEXT,"[LBHD]\n "+(string)hp+" / "+(string)mhp+" HP"+mod,color,1.0,
         PRIM_DESC,"LBA.v."+ver+","+(string)hp+","+(string)mhp+","+(string)atcap+",666"+modifierstring]);
         //In order: Current HP, Max HP, Max AT accepted, Max healing accepted (Not implemented)
 }
 die()
 {
     llRezObject("Explosion",llGetPos(),ZERO_VECTOR,ZERO_ROTATION,1);
-    //Add extra shit here
-    //llResetScript();//Debug
-    llDie();//Otherwise, use this
+    llSetStatus(STATUS_PHYSICS,0);
+    llSetRegionPos(start);
+    integer l=6;
+    llMessageLinked(-4,1,"","");
+    while(l--)
+    {
+        llSetLinkPrimitiveParamsFast(-4,[PRIM_TEXT,"[LBHD]\nRespawning in "+(string)l+"...",color,1.0,
+            PRIM_DESC,"v.LBA.DEAD"]);
+        llSleep(1.0);
+    }
+    llResetScript();
 }
 vector tar(key id)
 {
@@ -170,8 +177,10 @@ key user;
 key gen;//Object rezzer
 key me;
 integer hear;
+vector start;
 boot(integer entry)
 {
+    start=llGetPos();
     modifierstring=",F-"+llGetSubString((string)front,0,2)+//Frontal modifier
         ",S-"+llGetSubString((string)side,0,2)+//Side modifier
         ",R-"+llGetSubString((string)back,0,2)+//Rear modifier
@@ -274,6 +283,7 @@ default
             //Stores data as follows: OBJECT_NAME,OBJECT_MODIFIER
             //Updates objects of the same name to the most recent.
         }
+        else if(llDetectedType(0)&1&&llVecMag(llGetVel())>10.0)llDamage(llDetectedKey(0),100.0,2);//Squish
     }
     timer()
     {
@@ -300,14 +310,8 @@ default
                     llOwnerSay("Tracks repaired");
                 }
                 repair=0;
-                update();
             }
-            if(burning)
-            {
-                hp-=5;
-                if(hp>0)update();
-                else die();
-            }
+            update();
         }
         if(tar(gen))return;
         llDie();
