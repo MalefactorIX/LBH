@@ -311,7 +311,9 @@ default
                 }
                 repair=0;
             }
-            update();
+            //if(burning)hp-=5.0;//May be too punishing. Enable as needed/desired.
+            if(hp>0)update();
+            else die();
         }
         if(tar(gen))return;
         llDie();
