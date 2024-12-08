@@ -49,6 +49,7 @@ default
     on_rez(integer p)
     {
         vel=llGetVel();//Ideally you can use a timer event to keep this updated but that's on you.
+        if(p)llSetTimerEvent(0.1);
     }
     collision_start(integer c)
     {
@@ -82,5 +83,9 @@ default
     {
         llSleep(1.0);//Delay death for LBA processing
         llDie();
+    }
+    timer()
+    {
+        vel=llGetVel();
     }
 }
