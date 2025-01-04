@@ -1,3 +1,5 @@
+//Important: This will NOT work if the region death action is not set to 3 (No Action). Only an estate manager or estate owner can apply this setting.
+//llTeleportAgent is throttled to 10 teleports within 15 seconds. A system to alternate scripts/objects for teleportation may be necessary during high traffic.
 integer upper;
 integer lower;
 string BuildEventText(string _json)//Credit to the GrandFed gang for the original function
@@ -30,7 +32,7 @@ string BuildEventText(string _json)//Credit to the GrandFed gang for the origina
     string init=llJsonGetValue(_json, ["initial"]);
     if(dmg!=init)dmg=(string)llFloor((float)dmg)+" ("+(string)llFloor((float)init)+")";//Appends the attempted damage if it does not match the final damage (armor)
     else dmg=(string)llFloor((float)dmg);
-    if(type==-1)
+    if(type==-1)//splat
     {
         owner_name="Physics";
         rezzer_name="Newton's First Law";
@@ -67,7 +69,16 @@ default
         upper=(integer)llList2String(desc,1);
         lower=(integer)llList2String(desc,0);
         llSay(0,"Upper Boundry: "+(string)upper+"\nLower Boundry: "+(string)lower);
-        llListen(COMBAT_CHANNEL, "", COMBAT_LOG_ID, "");
+        if(llGetEnv("death_action")!="3")llSay(0,"Incompatible region settings. System disabled.\nRestart script once the region's death_action has been set to 3");
+        else 
+        {
+            llListen(COMBAT_CHANNEL, "", COMBAT_LOG_ID, "");
+            llSay(0,"System enabled.");
+        }
+    }
+    on_rez(integer p)
+    {
+        llResetScript();
     }
     experience_permissions(key id)
     {
