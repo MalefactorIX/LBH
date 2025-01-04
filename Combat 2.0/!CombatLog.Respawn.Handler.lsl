@@ -98,11 +98,11 @@ default
                     key source=llList2String(data,1);
                     //llOwnerSay("Attempting to respawn "+llKey2Name(target));
                     if(llAgentInExperience(target)&&llAgentInExperience(source))llRequestExperiencePermissions(target,"");
-                    else
+                    else //Forces experience
                     {
-                        llOwnerSay("Failed due to missing experience");
-                        if(!llAgentInExperience(target))llRegionSayTo(target,0,"You need to accept the region experience to do combat here. Until then, kills and deaths will not be proceeded if they are caused to or by you.");
-                        if(!llAgentInExperience(source))llRegionSayTo(source,0,"You need to accept the region experience to do combat here. Until then, kills and deaths will not be proceeded if they are caused to or by you.");
+                        //llOwnerSay("Failed due to missing experience");
+                        if(!llAgentInExperience(target))llRegionSayTo(target,0,"You need to accept the region experience to do combat here. Until then, kills and deaths will not be processed if they are caused to or by you.");
+                        if(!llAgentInExperience(source))llRegionSayTo(source,0,"You need to accept the region experience to do combat here. Until then, kills and deaths will not be processed if they are caused to or by you.");
                     }
                 }
                 //else llOwnerSay("null");
