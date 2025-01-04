@@ -1,6 +1,6 @@
 integer upper;
 integer lower;
-string BuildEventText(string _json)
+string BuildEventText(string _json)//Credit to the GrandFed gang for the original function
 {
     key target = (key)llJsonGetValue(_json, ["target"]);
     vector tpos=(vector)((string)llGetObjectDetails(target,[OBJECT_POS]));
