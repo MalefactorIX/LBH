@@ -1,4 +1,4 @@
-//Proof of concept because reeeeeeeEEEEEEEEEEEEあああああああああああああああああ sensor shotguns
+//Proof of concept because reeeeeeeEEEEEEEEEEEEあああああああああああああああああ sensor shotguns 
 
 //This is made to be easy to read and configure. As such, there are way more variables than optimal. This will mostly impact script memory. However, if used as a node, this issue shouldn't impact weapon performance.
 
