@@ -15,7 +15,7 @@ vector shot()//Returns a vector for represents the deviation for a shot.
     You can also change the base value itself, so if you want it to be 10m wide at 100 meters, you change the base value to 10
     Note that the spread is a diameter from the center of the shot. So 10m wide spread would be a 5m radius around the center.*/
     float half=base*0.5;//Used in calculations, do not touch.
-    vector vec=llVecNorm(<range,llFrand(base-half),llFrand(base)-half>);//RNGs all the things
+    vector vec=llVecNorm(<range,llFrand(base)-half,llFrand(base)-half>);//RNGs all the things
     return vec;
 }
 vector tar(key id)
