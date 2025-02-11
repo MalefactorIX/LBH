@@ -15,8 +15,7 @@ updatetext()
         <1.0,1.0,1.0>,1.0]);
     else llOwnerSay("Damage adjustment disabled in region");
 }
-list bl=["640eec5f-9583-42c9-8600-91f1394351e7",
-"0d4b89f6-a57e-4358-a7d3-84aea40f4219"];
+list bl;//Shitters
 integer bad(string uuid)
 {
     if(llListFindList(bl,["bad"])>-1)return 1;
