@@ -18,7 +18,7 @@ updatetext()
 list bl;//Shitters
 integer bad(string uuid)
 {
-    if(llListFindList(bl,["bad"])>-1)return 1;
+    if(llListFindList(bl,[uuid])>-1)return 1;
     else return 0;
 }
 
