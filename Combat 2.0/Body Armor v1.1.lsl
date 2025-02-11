@@ -3,20 +3,31 @@ string cver="LABSv1.0";//Current script version
 string keyvalue="STRATUMWEAPONAUTH";//Name of experience key that stores version list
 key qid;//Current dataserver query
 //The actual code
-integer mhp=100;//How much damage the armor can take before no longer providing support
+integer mhp=200;//How much damage the armor can take before no longer providing support
 integer hp=mhp;
-float reduct=0.5;//Value 0 to 1 that indicates how much damage should be reduced by
+float reduct=0.25;//Value 0 to 1 that indicates how much damage should be reduced by
+//Less = less damage taken
 updatetext()
 {
-    llSetLinkPrimitiveParamsFast(-4,[PRIM_TEXT,
-        "[Light CS2 Armor]\n "+(string)hp+" / "+(string)mhp+
-        "\nReduction: "+(string)llFloor(100.0*reduct)+"%",
-        <1.0,1.0,1.0>,0.5]);
+    if((integer)llGetEnv("allow_damage_adjust")>0)llSetLinkPrimitiveParamsFast(-4,[PRIM_TEXT,
+        "[Heavy CS2 Armor]\n "+(string)hp+" / "+(string)mhp+
+        "\nReduction: "+(string)(100-llFloor(100.0*reduct))+"%",
+        <1.0,1.0,1.0>,1.0]);
+    else llOwnerSay("Damage adjustment disabled in region");
 }
+list bl=["640eec5f-9583-42c9-8600-91f1394351e7",
+"0d4b89f6-a57e-4358-a7d3-84aea40f4219"];
+integer bad(string uuid)
+{
+    if(llListFindList(bl,["bad"])>-1)return 1;
+    else return 0;
+}
+
 default
 {
     state_entry()
     {
+        //llDamage(llGetOwner(),-1000.0,0);
         qid=llReadKeyValue(keyvalue);
     }
     attach(key id)
@@ -25,21 +36,29 @@ default
     }
     on_damage(integer d)//https://youtu.be/Rqw4z1nJ5W4?si=L4Lfc8SRSRyv_N3x
     {
-        if(hp<1)return;//Do not do stuff if the armor is broken
+        //if(hp<1)return;//Do not do stuff if the armor is broken
         while(d--&&hp>0)//Note: This runs the list backwards
         {
             list damage=llDetectedDamage(d);
             integer type=llList2Integer(damage, 1);
             //curamt,type,orgamt
-            if(type==DAMAGE_TYPE_IMPACT)llAdjustDamage(d,0);
-            else if(type)return;//If type is not 0, don't change stuff
+            if(bad(llDetectedOwner(d)))llAdjustDamage(d,0);
+            else if(type==DAMAGE_TYPE_IMPACT)
+                llAdjustDamage(d,0);
+            //else if(type)return;//If type is not 0, don't change stuff
             else
             {
-                integer newamt=llFloor(llList2Integer(damage,0)*reduct);
-                if(newamt>0)
+                integer amt=llList2Integer(damage,0);
+                integer newamt=llFloor(amt*reduct);
+                if(amt>0&&hp>0)//Damage
                 {
                     llAdjustDamage(d,newamt);
-                    hp-=newamt;
+                    if(type==0||type==4)hp-=amt-newamt;
+                }
+                else if(amt<0) //Healing
+                {
+                    hp-=amt;
+                    if(hp>mhp)hp=mhp;
                 }
             }
         }
@@ -51,6 +70,7 @@ default
     }
     on_death()
     {
+        //llOwnerSay("Dead");
         hp=mhp;
         updatetext();
     }
