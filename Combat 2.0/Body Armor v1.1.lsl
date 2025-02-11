@@ -42,7 +42,7 @@ default
             integer type=llList2Integer(damage, 1);
             //curamt,type,orgamt
             if(bad(llDetectedOwner(d)))llAdjustDamage(d,0);
-            else if(type==DAMAGE_TYPE_IMPACT)
+            else if(type==DAMAGE_TYPE_IMPACT||bad(llDetectedKey(d))//Impact and blacklist check
                 llAdjustDamage(d,0);
             //else if(type)return;//If type is not 0, don't change stuff
             else
