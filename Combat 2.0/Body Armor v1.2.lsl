@@ -4,9 +4,9 @@ string keyvalue;//Name of experience key that stores data
 string regionname;//Used for region-specific keys
 key qid;//Current dataserver query
 //The actual code
-integer mhp=2000000000;//How much damage the armor can take before no longer providing support
+integer mhp=200;//How much damage the armor can take before no longer providing support
 integer hp=mhp;
-float reduct=0.0;//Value 0 to 1 that indicates how much damage should be reduced by
+float reduct=0.25;//Value 0 to 1 that indicates how much damage should be reduced by
 //Less = less damage taken
 updatetext()
 {
