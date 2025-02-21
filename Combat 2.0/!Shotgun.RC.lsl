@@ -1,4 +1,4 @@
-//Proof of concept because reeeeeeeEEEEEEEEEEEEあああああああああああああああああ sensor shotguns 
+//Proof of concept because reeeeeeeEEEEEEEEEEEEあああああああああああああああああ sensor shotguns
 
 //This is made to be easy to read and configure. As such, there are way more variables than optimal. This will mostly impact script memory. However, if used as a node, this issue shouldn't impact weapon performance.
 
@@ -18,10 +18,10 @@ vector shot()//Returns a vector for represents the deviation for a shot.
     vector vec=llVecNorm(<range,llFrand(base)-half,llFrand(base)-half>);//RNGs all the things
     return vec;
 }
-vector tar(key id)
+/*vector tar(key id)//Unused
 {
    return (vector)((string)llGetObjectDetails(id,[OBJECT_POS]));
-}
+}*/
 vector GetRegionEdge(vector start, vector dir)
 {
     float scaleGuess;
@@ -61,12 +61,17 @@ fire()//THE PART THAT DOES SHIT
         if(llList2Integer(ray,-1)>0)//Checks to see if we hit something
         {
             key hit=llList2Key(ray,0);//Pulls the UUID of what we hit
-            if(hit==o)hit=llList2Key(ray,2);//Prevents us from shooting ourselves
+            vector tar=llList2Vector(ray,1);
+            if(hit==o)//Prevents us from shooting ourselves
+            {
+                hit=llList2Key(ray,2);
+                tar=llList2Vector(ray,3);
+            }
             if(llGetAgentSize(hit))//Checks to see if what we hit was an avatar, if anything
             {
                 //DAMAGE CALULATIONS
                 float damage=base_damage;
-                float dist=llVecDist(cpos,tar(hit));
+                float dist=llVecDist(cpos,tar);
                 if(dist>forange)//Are we suffering from falloff?
                 {
                     damage-=falloff*(dist-forange);
