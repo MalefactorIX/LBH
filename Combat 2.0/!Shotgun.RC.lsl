@@ -6,7 +6,7 @@
 
 //This script lacks edge detection for limited range, but the unlimited range option does not have this limitation. When using the unlimited range option, spread will continue to extend beyond the max value at the same rate set in the calculations. When not using edge detection, raycast tends to return nulls but since we're firing multiple rays per shot, this will have minimal impact on reliability.
 
-integer unlimit;//Toggles whether or not you want all pellets to fly to the region edge.
+integer unlimit=1;//Toggles whether or not you want all pellets to fly to the region edge.
 float range=100.0;//How far the shotgun can shoot before not being able to hit anything.
 vector shot()//Returns a vector for represents the deviation for a shot.
 {
@@ -42,6 +42,13 @@ vector GetRegionEdge(vector start, vector dir)
     }
     return start + dir * scaleFactor;
 }
+lba(key targ,integer hex,string dmg)
+{
+
+    //llSetObjectName((string)llFrand(10000000.0));
+    if(hex)llRegionSayTo(targ,hex,(string)targ+","+dmg);
+    else llRegionSayTo(targ,-500,(string)targ+",damage,"+dmg);
+}
 fire()//THE PART THAT DOES SHIT
 {
     vector cpos=llGetCameraPos();
@@ -49,15 +56,27 @@ fire()//THE PART THAT DOES SHIT
     integer pellets=8;//How many pellets per shot
     float base_damage=45.0;//How much damage per pellet
     float min_damage=15.0;//Min damage per pellet
+    integer lba_damage=1;//LBA damage per pellet
     float falloff=0.5;//How many damage per meter to decay damage
     float forange=20.0;//At what range does damage decay start
     integer type;//The flag used for LLDamage for type (leave 0 or unset unless using special ammo, ie. flechette)
     list data;//Stores data for valid hits for bulk processing
+    list lbadata;
+    list posdata;//Data used for tracers
     while(pellets--)
     {
         list ray;
-        if(unlimit)ray=llCastRay(cpos,GetRegionEdge(cpos,shot()*rot),[RC_REJECT_TYPES,RC_REJECT_PHYSICAL,RC_DATA_FLAGS,RC_GET_ROOT_KEY,RC_MAX_HITS,2]);
-        else ray=llCastRay(cpos,cpos+((shot()*rot)*range),[RC_REJECT_TYPES,RC_REJECT_PHYSICAL,RC_DATA_FLAGS,RC_GET_ROOT_KEY,RC_MAX_HITS,2]);//Does not feature edge detection.
+        vector epos;
+        if(unlimit)
+        {
+            epos=GetRegionEdge(cpos,shot()*rot);
+            ray=llCastRay(cpos,epos,[RC_REJECT_TYPES,RC_REJECT_PHYSICAL,RC_DATA_FLAGS,RC_GET_ROOT_KEY,RC_MAX_HITS,2]);
+        }
+        else
+        {
+            epos=cpos+((shot()*rot)*range);
+            ray=llCastRay(cpos,epos,[RC_REJECT_TYPES,RC_REJECT_PHYSICAL,RC_DATA_FLAGS,RC_GET_ROOT_KEY,RC_MAX_HITS,2]);//Does not feature edge detection.
+        }
         if(llList2Integer(ray,-1)>0)//Checks to see if we hit something
         {
             key hit=llList2Key(ray,0);//Pulls the UUID of what we hit
@@ -66,6 +85,14 @@ fire()//THE PART THAT DOES SHIT
             {
                 hit=llList2Key(ray,2);
                 tar=llList2Vector(ray,3);
+                if(tar)posdata+=tar;//Adds valid hits to a list
+                else posdata+=epos;//Else adds where ray stopped
+
+            }
+            else
+            {
+                if(tar)posdata+=tar;//Adds valid hits to a list
+                else posdata+=epos;//Else adds where ray stopped
             }
             if(llGetAgentSize(hit))//Checks to see if what we hit was an avatar, if anything
             {
@@ -86,8 +113,27 @@ fire()//THE PART THAT DOES SHIT
                     data=llListReplaceList(data,[llList2Float(data,l)+damage],l,l);//Adds damage to existing entry
                 }
             }
-            //You can technically add LBA support here as an 'else if'
+            else //LBA suppoer
+            {
+                integer l=llListFindList(lbadata,[hit]);
+                if(l<0)//No previously recorded LBA data for this hit
+                {
+                    string desc=llList2String(llGetObjectDetails(hit,[OBJECT_DESC]),0);
+                    if(desc!=""&&(llGetSubString(desc,0,1)=="v."||llGetSubString(desc,0,5)=="LBA.v."))
+                    {
+                        integer hex=(integer)("0x" + llGetSubString(llMD5String((string)hit,0), 0, 3));
+                        if(llGetSubString(desc,0,5)!="LBA.v.")hex=0;
+                        lbadata+=[hit,hex,lba_damage];
+                    }
+                }
+                else //Updates existing damage
+                {
+                    l+=2;
+                    lbadata=llListReplaceList(lbadata,[llList2Integer(lbadata,l)+lba_damage],l,l);
+                }
+            }
         }
+        else posdata+=epos;//If no hits, adds the end of ray to the position list
     }
     integer l=llGetListLength(data);
     integer i;
@@ -100,6 +146,21 @@ fire()//THE PART THAT DOES SHIT
         //llOwnerSay("Hit "+llKey2Name(hit)+" for "+(string)llFloor(damage));//Not recommended but offers a simple hit report for debugging. Best to use a dedicated hud with combat log support to track damage.
         i+=2;
     }
+    l=llGetListLength(lbadata);
+    //if(l)llSay(0,llDumpList2String(lbadata,","));
+    //else llSay(0,"Null list");
+    i=0;
+    while(i<l)
+    {
+        lba(llList2Key(lbadata,i),llList2Integer(lbadata,i+1),(string)llList2Integer(lbadata,i+2));
+        i+=3;
+    }
+    list rezparams=[REZ_POS,cpos,0,1,
+        REZ_ROT,ZERO_ROTATION,0,
+        REZ_PARAM,1,
+        REZ_PARAM_STRING,llDumpList2String(posdata,";")];
+    /*if(llGetListLength(posdata))*/llRezObjectWithParams("[UwU]Scatter.RCS",rezparams);
+    //else llSay(0,"No position data");
 }
 key o;//Owner key
 default
