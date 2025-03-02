@@ -2,8 +2,6 @@
 
 //This is made to be easy to read and configure. As such, there are way more variables than optimal. This will mostly impact script memory. However, if used as a node, this issue shouldn't impact weapon performance.
 
-//This script offers no tracer feedback as is, create your own or improvise \o/
-
 //This script lacks edge detection for limited range, but the unlimited range option does not have this limitation. When using the unlimited range option, spread will continue to extend beyond the max value at the same rate set in the calculations. When not using edge detection, raycast tends to return nulls but since we're firing multiple rays per shot, this will have minimal impact on reliability.
 
 integer unlimit=1;//Toggles whether or not you want all pellets to fly to the region edge.
