@@ -7,7 +7,7 @@
 //This script lacks edge detection for limited range, but the unlimited range option does not have this limitation. When using the unlimited range option, spread will continue to extend beyond the max value at the same rate set in the calculations. When not using edge detection, raycast tends to return nulls but since we're firing multiple rays per shot, this will have minimal impact on reliability.
 
 integer unlimit=1;//Toggles whether or not you want all pellets to fly to the region edge.
-float range=100.0;//How far the shotgun can shoot before not being able to hit anything.
+float range=100.0;//How far the shotgun can shoot before not being able to hit anything in limited mode, affects spread of both modes.
 vector shot()//Returns a vector for represents the deviation for a shot.
 {
     float base=5.0;//Determines the magnitude of spread based off range. Higher = more
@@ -18,10 +18,6 @@ vector shot()//Returns a vector for represents the deviation for a shot.
     vector vec=llVecNorm(<range,llFrand(base)-half,llFrand(base)-half>);//RNGs all the things
     return vec;
 }
-/*vector tar(key id)//Unused
-{
-   return (vector)((string)llGetObjectDetails(id,[OBJECT_POS]));
-}*/
 vector GetRegionEdge(vector start, vector dir)
 {
     float scaleGuess;
@@ -42,10 +38,8 @@ vector GetRegionEdge(vector start, vector dir)
     }
     return start + dir * scaleFactor;
 }
-lba(key targ,integer hex,string dmg)
+lba(key targ,integer hex,string dmg)//Message relay for LBA damage
 {
-
-    //llSetObjectName((string)llFrand(10000000.0));
     if(hex)llRegionSayTo(targ,hex,(string)targ+","+dmg);
     else llRegionSayTo(targ,-500,(string)targ+",damage,"+dmg);
 }
