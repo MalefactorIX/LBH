@@ -49,7 +49,7 @@ default
     on_damage(integer d)//https://youtu.be/Rqw4z1nJ5W4?si=L4Lfc8SRSRyv_N3x
     {
         //if(hp<1)return;//Do not do stuff if the armor is broken
-        while(d--&&hp>0)//Note: This runs the list backwards
+        while(d--)//Note: This runs the list backwards
         {
             list damage=llDetectedDamage(d);
             integer type=llList2Integer(damage, 1);
