@@ -1,5 +1,5 @@
 # The Rate of Fire throttle
-aka, the infamous "rez queue". There is a limit to how many objects or 'rez calls' an avatar's scripted attachments can spawn before the region enacts a restriction. 
+aka, the infamous "rez queue". There is a server-side limit to how many objects or 'rez calls' an avatar's scripted attachments can spawn before the region enacts a restriction. 
 This restriction freezes all scripts for attachments or objects attempting to spawn additional objects. It should be noted that ESTATE MANAGERS (confirmed) and potentially land moderation (needs more testing) are NOT affected by this restriction within the regions they manage.
 
 This restriction is separate from global rezqueue but is part of the same system. The global rezqueue is triggered during the same timr window that this restriction is imposed against avatars, however is it generally shorter than the targetted restrictions in duration.
