@@ -16,3 +16,4 @@ If you are looking to avoid the issue, I would strongly recommend keeping weapon
 Post-Combat 2.0, the need to have individual spawn parcels has become obsolete. The same applies to changing ideology in regards to vehicle respawning.
 In the case of avatars, functions like llGetHealth allow us to more actively monitor a target's health state and prevent blackscreening. The same *should* be true for vehicles but in practice has been inconsistent. 
 More effort and coordination will need to be made to prevent objects from improperly damaging vehicles or avatars past the kill-point.
+This change will have to be done globally which means a lot of older gear with lingering effects may end up being disallowed if the effect does not expire within a reasonable timeframe.
