@@ -10,6 +10,7 @@ string armortype="ballisticarmor";//Data key used for armor data. Determines res
 - Flame Armor: Focuses on blocking flame damage.
 - Tesla Armor: Focuses on blocking lightning damage.
 - Plate Armor: Focuses on blocking physical damage
+- Flak: Focuses on blocking blast damage
 */
 string datatype;//Tells the script what data we're waiting on
 //FUNCTIONS
