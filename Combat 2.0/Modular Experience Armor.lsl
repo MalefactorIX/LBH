@@ -10,7 +10,6 @@ string armortype="ballisticarmor";//Data key used for armor data. Determines res
 - Flame Armor: Focuses on blocking flame damage.
 - Tesla Armor: Focuses on blocking lightning damage.
 - Plate Armor: Focuses on blocking physical damage
-- Flak: Focuses on blocking blast damage
 */
 string datatype;//Tells the script what data we're waiting on
 //FUNCTIONS
@@ -112,7 +111,7 @@ default
             else if(hp>0&&amt>0)//Handles damage
             {
                 integer newamt;
-                if(type==0&&ballres!=0.0)//normal damage resistance
+                if(type==0&&ballres!=1.0)//normal damage resistance
                 {
                     newamt=llFloor(amt*ballres);
                     llAdjustDamage(d,newamt);
@@ -124,16 +123,27 @@ default
                 }
                 else if(type==5||type==3)//thermal damage resistance
                 {
-                    if(thermalres!=0.0)
+                    if(thermalres!=1.0)
                     {
                         newamt=llFloor(amt*thermalres);
                         llAdjustDamage(d,newamt);
                     }
                 }
+                else if(type==6||type==102)//blast damage resistance
+                {
+                    if(blastres!=1.0)
+                    {
+                        if(blastres!=1.0)
+                        {
+                            newamt=llFloor(amt*blastres);
+                            llAdjustDamage(d,newamt);
+                        }
+                    }
+                }
                 else if(type==2||type==8||type==12)
                 {
                     //bludgeoning, piercing, and slashing respectively
-                    if(physres!=0.0)
+                    if(physres!=1.0)
                     {
                         newamt=llFloor(amt*physres);
                         llAdjustDamage(d,newamt);
