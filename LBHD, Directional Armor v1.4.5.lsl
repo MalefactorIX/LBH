@@ -87,7 +87,7 @@ string modifierstring;//This is visible so moderators can confirm vehicle attrib
 string prefix="[LBHD]";
 update()//SetText
 {
-    if(hp>0)llSetLinkPrimitiveParamsFast(-4,[PRIM_TEXT,prefix+"[\n "+(string)hp+" / "+(string)mhp+" HP",color,1.0,
+    if(hp>0)llSetLinkPrimitiveParamsFast(-4,[PRIM_TEXT,prefix+"\n "+(string)hp+" / "+(string)mhp+" HP",color,1.0,
         PRIM_DESC,"LBA.v."+ver+","+(string)hp+","+(string)mhp+","+(string)atcap+",999"+modifierstring]);
         //In order: Current HP, Max HP, Max AT accepted, Max healing accepted (Not implemented)
     else llSetLinkPrimitiveParamsFast(-4,[PRIM_TEXT,"DEAD",<1.0,0.0,0.0>,1.0,
