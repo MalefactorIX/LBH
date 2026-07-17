@@ -1,23 +1,25 @@
-string ver="DHv1.4.3";//LBA Version
-integer mhp=200;//Maximum HP
+string ver="DHv1.5";//LBA Version
+integer hd=1;//Toggles whether or not to use HD by default.
+vector color=<1.0,0.5,0.0>;
+integer mhp=100;//Maximum HP
 integer hp=mhp;//Current HP
 //Positive Numbers Deal Damage
 //Negative Numbers Restore Health
 //Damage Multipliers: 0 = Invulnerable, 1.0 = 100% Damage, High numbers = Higher Damage
 //The total between all values should be around 5.0 for balancing purposes.
-integer atcap=200;
+integer atcap=50;
 float front=0.5;
-float side=1.0;
-float back=1.5;
-float middle=0.1;
+float side=0.750;
+float back=2.0;
+float middle=0.5;
 //Note that following modifiers multiply the final damage. So it stacks multiplicatively with the previous modifiers
-float top=1.2;
-float bottom=1.5;
+float top=1.0;
+float bottom=0.5;
 //Directional Processor
-float front_threshold=25.0;//Use positive floats, determines forward range
-float back_threshold=155.0;//Use positive floats, determines backward range
-float top_threshold=0.75;//How far up the Z axis should the source be to registered a top. (Positive Number)
-float bottom_threshold=-0.75;//How far down the Z axis should the source be to registered a bottom hit. (Negative Number)
+float front_threshold=90.0;//Use positive floats, determines forward range
+float back_threshold=125.0;//Use positive floats, determines backward range
+float top_threshold=0.5;//How far up the Z axis should the source be to registered a top. (Positive Number)
+float bottom_threshold=-0.5;//How far down the Z axis should the source be to registered a bottom hit. (Negative Number)
 float collisionmod(vector pos, vector targetPos)
 {
     if(targetPos)
@@ -48,12 +50,13 @@ float collisionmod(vector pos, vector targetPos)
 //Damage Processor
 damage(integer amt, key id,vector pos, vector targetPos, float tmod, string name)
 {
+    //llSay(0,"dmg process: "+(string)amt);
     if(amt>atcap)amt=atcap;
     if(amt<0)//Allows the object to be healed/repaired
     {
         if(llGetTime()>1.0)//Optional healing cooldown
         {
-            amt*=-1.0;
+            amt*=-1;
             if(amt>(float)hp*0.1)amt=llRound(hp*0.1);//Optional healing cap
             hp+=amt;
             if(hp>mhp)hp=mhp;//Used to prevent overhealing
@@ -78,20 +81,24 @@ damage(integer amt, key id,vector pos, vector targetPos, float tmod, string name
         llRegionSayTo(llGetOwnerKey(id),0,"/me took "+(string)directional_amt+" ("+(string)amt+") damage");
     }
     if(hp<1)die();
-    else update();
+    update();
 }
 string modifierstring;//This is visible so moderators can confirm vehicle attributes are within regulation.
+string prefix="[LBHD]";
 update()//SetText
 {
-    llSetLinkPrimitiveParamsFast(-4,[PRIM_TEXT,"[LBHD]\n "+(string)hp+" / "+(string)mhp+" HP",<0.0,0.75,1.0>,1.0,
+    if(hp>0)llSetLinkPrimitiveParamsFast(-4,[PRIM_TEXT,prefix+"[\n "+(string)hp+" / "+(string)mhp+" HP",color,1.0,
         PRIM_DESC,"LBA.v."+ver+","+(string)hp+","+(string)mhp+","+(string)atcap+",999"+modifierstring]);
         //In order: Current HP, Max HP, Max AT accepted, Max healing accepted (Not implemented)
+    else llSetLinkPrimitiveParamsFast(-4,[PRIM_TEXT,"DEAD",<1.0,0.0,0.0>,1.0,
+        PRIM_DESC,"LBA.v."+ver+","+(string)hp+","+(string)mhp+","+(string)atcap+",999"+modifierstring]);
 }
 die()
 {
     //Add extra shit here
     //llResetScript();//Debug
-    llDie();//Otherwise, use this
+    llMessageLinked(-4,1,"","");
+    //llDie();//Otherwise, use this
 }
 integer los(vector start, vector target)//1=LoS,0=Obstructed
 {
@@ -123,6 +130,7 @@ boot()
     if(hear)llListenRemove(hear);
     integer hex=(integer)("0x" + llGetSubString(llMD5String((string)me,0), 0, 3));
     hear=llListen(hex,"","","");
+    if(llGetStartParameter())llListen(-910,"","","die");
     llSetTimerEvent(1.0);//Used for auto-delete.
     update();
 }
@@ -136,10 +144,18 @@ default
     {
         if(p>1)//Allows HUD/Objects to set HP value when rezzed with a param, otherwise uses default
         {
-            mhp=p;
-            hp=p;
+            if(p>1)hd=1;
+            else hd=0;
         }
         boot();
+    }
+    changed(integer c)
+    {
+        if(c&CHANGED_LINK)
+        {
+            if(llAvatarOnSitTarget())back=5.0;
+            else back=2.0;
+        }
     }
     listen(integer chan, string name, key id, string message)
     {
@@ -161,20 +177,26 @@ default
             float amt=llList2Float(parse,-1);
             if(llFabs(amt)<666.0)
             {
-                if(llList2Integer(data,1))
+                if(hd)
                 {
-                    float dist=llVecDist(targetPos,pos)-2.0;
-                    vector posfix=targetPos+<dist,0.0,0.0>*llList2Rot(data,2);
-                    if(los(pos,posfix))damage((integer)amt,id,pos,posfix,0.0,name);
-                    else damage((integer)amt,id,pos,targetPos,0.0,name);
+                    if(llList2Integer(data,1))
+                    {
+                        float dist=llVecDist(targetPos,pos)-2.0;
+                        vector posfix=targetPos+<dist,0.0,0.0>*llList2Rot(data,2);
+                        if(los(pos,posfix))damage((integer)amt,id,pos,posfix,0.0,name);
+                        else damage((integer)amt,id,pos,targetPos,0.0,name);
+                    }
+                    else damage((integer)amt,id,pos,targetPos,tmod,name);
                 }
-                else damage((integer)amt,id,pos,targetPos,tmod,name);
+                else damage((integer)amt,id,pos,targetPos,1.0,name);
             }
         }
+        else if(chan==-910&&llGetOwnerKey(id)==user)llDie();
     }
     collision_start(integer c)
     {
-        if(llVecMag(llDetectedVel(0))>40.0)
+        if(hd<1)return;
+        else if(llVecMag(llDetectedVel(0))>40.0)
         {
             vector gpos=llGetPos();
             if(tracker==[])llSetTimerEvent(1.0);
