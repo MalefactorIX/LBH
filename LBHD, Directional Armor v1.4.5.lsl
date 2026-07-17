@@ -67,18 +67,27 @@ damage(integer amt, key id,vector pos, vector targetPos, float tmod, string name
     /*else if(amt<6)return; //Blocks micro-LBA*/
     else
     {
-        integer directional_amt;
-        if(tmod)directional_amt=llFloor(amt*tmod);
-        else directional_amt=llFloor(collisionmod(pos,targetPos)*(float)amt);
-        if(directional_amt)hp-=directional_amt;
-        else //Failed to do damage
+        if(hd)
         {
-            llOwnerSay("Damage Blocked by Armor");
-            llRegionSayTo(llGetOwnerKey(id),0,"Attack was stopped by armor.");
-            return;
+            integer directional_amt;
+            if(tmod)directional_amt=llFloor(amt*tmod);
+            else directional_amt=llFloor(collisionmod(pos,targetPos)*(float)amt);
+            if(directional_amt)hp-=directional_amt;
+            else //Failed to do damage
+            {
+                llOwnerSay("Damage Blocked by Armor");
+                llRegionSayTo(llGetOwnerKey(id),0,"Attack was stopped by armor.");
+                return;
+            }
+            llOwnerSay("/me took "+(string)directional_amt+" ("+(string)amt+") damage from "+name+" by "+llKey2Name(llGetOwnerKey(id)));//Used to debug output.
+            llRegionSayTo(llGetOwnerKey(id),0,"/me took "+(string)directional_amt+" ("+(string)amt+") damage");
         }
-        llOwnerSay("/me took "+(string)directional_amt+" ("+(string)amt+") damage from "+name+" by "+llKey2Name(llGetOwnerKey(id)));//Used to debug output.
-        llRegionSayTo(llGetOwnerKey(id),0,"/me took "+(string)directional_amt+" ("+(string)amt+") damage");
+        else
+        {
+            hp-=amt;
+            llOwnerSay("/me took "+(string)amt+" damage from "+name+" by "+llKey2Name(llGetOwnerKey(id)));//Used to debug output.
+            llRegionSayTo(llGetOwnerKey(id),0,"/me took "+(string)amt);
+        }
     }
     if(hp<1)die();
     update();
@@ -149,10 +158,11 @@ default
                 hd=1;
                 prefix="[LBHD]";
             }
-            else 
+            else
             {
                 prefix="[LBH]";
                 hd=0;
+                middle=1.0;
             }
         }
         boot();
@@ -196,7 +206,7 @@ default
                     }
                     else damage((integer)amt,id,pos,targetPos,tmod,name);
                 }
-                else damage((integer)amt,id,pos,targetPos,1.0,name);
+                else damage((integer)amt,id,ZERO_VECTOR,ZERO_VECTOR,1.0,name);
             }
         }
         else if(chan==-910&&llGetOwnerKey(id)==user)llDie();
