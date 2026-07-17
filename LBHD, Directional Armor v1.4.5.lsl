@@ -151,7 +151,7 @@ default
     }
     on_rez(integer p)
     {
-        if(p>1)//Allows HUD/Objects to set HP value when rezzed with a param, otherwise uses default
+        if(p)//Allows HUD/Objects to set HP value when rezzed with a param, otherwise uses default
         {
             if(p>1)
             {
