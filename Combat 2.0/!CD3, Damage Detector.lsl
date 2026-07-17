@@ -1,6 +1,8 @@
 string last;
 key o;
 integer mode=2;//0 = Off, 1 = As hit, 2 = On death
+list dtypes=["Normal","Acid","Blunt","Cold","Electric","Fire","Force","Necrotic","Piercing","Poison","Psychic","Radiant","Slashing","Sonic","Emotional"];
+list d2types=["Medical","Repair","Blast","Pressure"];
 default
 {
     state_entry()
@@ -35,15 +37,22 @@ default
         string text;
         while(d--)
         {
-            if(llList2Integer(llDetectedDamage(d),1)>-1)
+            list dam=llDetectedDamage(d);
+            if(llList2Integer(dam,1)>-1)
             {
                 vector vel=llDetectedVel(d);
                 integer ivel;
                 string rezzer=llKey2Name(llDetectedRezzer(d));
                 key owner=llDetectedOwner(d);
+                integer type=llList2Integer(dam,1);
+                string dmg;
+                if(type>100)dmg=llList2String(d2types,type-100);
+                else if(type<15)dmg=llList2String(dtypes,type);
+                if(dmg=="")dmg="UNKNOWN";
+                dmg=(string)llList2Integer(dam,0)+" ["+dmg+"]";
                 if(vel!=ZERO_VECTOR)ivel=llRound(llVecMag(vel));
-                if(ivel)text+="["+llDetectedName(d)+"] at "+(string)ivel+"m/s";
-                else text+="["+llDetectedName(d)+"]";
+                if(ivel)text+="["+llDetectedName(d)+"] for "+dmg+" at "+(string)ivel+"m/s";
+                else text+="["+llDetectedName(d)+"] for "+dmg;
                 if(owner==o)text+=" by yourself";
                 else text+=" by "+(string)"secondlife:///app/agent/"+(string)owner+ "/about";
                 if(rezzer)text+=" using ["+rezzer+"]\n";
