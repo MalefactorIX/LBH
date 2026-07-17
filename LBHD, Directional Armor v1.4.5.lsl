@@ -144,8 +144,16 @@ default
     {
         if(p>1)//Allows HUD/Objects to set HP value when rezzed with a param, otherwise uses default
         {
-            if(p>1)hd=1;
-            else hd=0;
+            if(p>1)
+            {
+                hd=1;
+                prefix="[LBHD]";
+            }
+            else 
+            {
+                prefix="[LBH]";
+                hd=0;
+            }
         }
         boot();
     }
